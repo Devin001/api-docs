@@ -4604,6 +4604,7 @@ A Discussion is a collection of one or more [Comments](#comments). A Discussion 
 **id** | number | Discussion ID
 **title** | string | Discussion title
 **comments** | [Comment](#comment-object)[] | Array of Comment objects
+**commentCount** | number | The number of comments in the discussion
 **commentAttachments** | [Attachment](#attachment-object)[] | Array of Attachment objects
 **parentId** | number | ID of the directly associated row or sheet: present only when the direct association is not clear (see [Get All Discussions](#get-all-discussions))
 **parentType** | string | "SHEET" or "ROW": present only when the direct association is not clear (see [Get All Discussions](#get-all-discussions))
@@ -5105,7 +5106,8 @@ discussion = smartsheet.Discussions.get_discussion(sheetId, discussionId)
             },
             "modifiedAt": "2012-07-25T00:02:42-07:00"
         }
-    ]
+    ],
+    "commentCount" : 1
 }
 ```
 
