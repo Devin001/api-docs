@@ -12185,7 +12185,7 @@ only has read-only access to the sheet (i.e. the user has viewer permissions, or
 -----|-----|
 <%= SCOPE %> | ADMIN_SHEETS
 <%= HEADERS %> | <%= HEADER_AUTH %><br/><%= HEADER_CT_JSON %>
-<%= REQUEST %> | [Sheet object](#sheet-object) limited to the following attributes:<ul><li>name (optional)</li><li>userSettings (optional): [SheetUserSettings object](#sheetusersettings-object) for updating this user's settings for the sheet</li><li>projectSettings (optional): [ProjectSettings object](#projectsettings-object) for updating this sheet's project settings and dependencies</li></ul>
+<%= REQUEST %> | [Sheet object](#sheet-object) limited to the following attributes:<ul><li>name (optional)</li><li>userSettings (optional): [SheetUserSettings object](#sheetusersettings-object) for updating these user's settings for the sheet</li><li>projectSettings (optional): [ProjectSettings object](#projectsettings-object), containing at least one of the projectSettings attributes, for updating this sheet's project settings and dependencies.</li></ul>Please note the following:<ul><li>Attributes not specified in projectSettings will not be updated.</li><li>If projectSettings.nonWorkingDays is specified as an empty array, all non-working days will be removed from the project sheet.</li></ul>
 <%= RETURNS %> | [Result object](#result-object) containing a [Sheet object](#sheet-object) for the updated Sheet
 
 ## <%= RELATED %>
