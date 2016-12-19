@@ -38,6 +38,7 @@ search: false
 <% SHARING_ERRORS = "If called with a single [Share object](#share-object), and that user or group share already exists, [error code](#errors) **1025** will be returned.  If called with an array of Share objects, and one or more user or group shares in the array already exist, they will be ignored and omitted from the response." %>
 <% LIST_SHARES_RESPONSE_DESC = "By default, this operation returns only <i>item-level</i> shares (<b><a href='#share-object'>scope</b></a>='ITEM'). Use the <b>include</b> parameter to request that <i>workspace-level</i> shares (<b><a href='#share-object'>scope</b></a>=='WORKSPACE') also be returned." %>
 <% WEBHOOKS_INTRO = "Webhooks provide a way for Smartsheet to automatically notify your external application or service when certain events occur in Smartsheet. Webhooks offer a more efficient alternative to using the API to periodically <i>poll</i> for changes." %>
+<% CUSTOM_WELCOME_SCREEN_URL = "https://help.smartsheet.com/articles/1392225-customizing-a-welcome-message-upgrade-screen-enterprise-only-#welcomescreen" %>
 
 # <span class="customTOCSectionHeading">Smartsheet API 2.0</span>
 
@@ -13052,9 +13053,9 @@ Revokes the access token used to make this request.  The access token will no lo
 **resourceViewer** | boolean | Flag indicating whether the user is a resource viewer (can access resource views)
 **status** | string |  User status, set to one of the following values:<ul><li>ACTIVE</li><li>PENDING</li><li>DECLINED</li></ul>
 **alternateEmails** | [AlternateEmail](#alternateemail-object)[] | An array of [AlternateEmail objects](#alternateemail-object) representing the alternate email address(es) associated with the User account
-**sheetCount** | number | Count of user's owned sheets within an organization
-**lastLogin** | timestamp | User's timestamp of last login
-**customWelcomeScreenViewed** | timestamp | User's timestamp of viewing an Enterprise Custom Welcome Screen
+**sheetCount** | number | The number of sheets owned by the current user within the organization
+**lastLogin** | timestamp | Last login time of the current user
+**customWelcomeScreenViewed** | timestamp | Timestamp of viewing an Enterprise [Custom Welcome Screen](<%= CUSTOM_WELCOME_SCREEN_URL %>) by the current user
 
 ### UserProfile Object
 
@@ -13073,6 +13074,9 @@ Revokes the access token used to make this request.  The access token will no lo
 **resourceViewer** | boolean | Flag indicating whether the user is a resource viewer (can access resource views)
 **status** | string | User status, set to one of the following values: <ul><li>ACTIVE</li><li>PENDING</li><li>DECLINED</li></ul>
 **alternateEmails** | [AlternateEmail](#alternateemail-object)[] | An array of [AlternateEmail objects](#alternateemail-object) representing the alternate email address(es) associated with the User account
+**sheetCount** | number | The number of sheets owned by the current user within the organization
+**lastLogin** | timestamp | Last login time of the current user
+**customWelcomeScreenViewed** | timestamp | Timestamp of viewing an Enterprise [Custom Welcome Screen](<%= CUSTOM_WELCOME_SCREEN_URL %>) by the current user
 
 ### Account Object
 
@@ -13538,13 +13542,16 @@ user = smartsheet.Users.get_user(userId)
     "licensedSheetCreator": true,
     "groupAdmin": true,
     "resourceViewer": true,	
-	"alternateEmails": [
-		{
-			"id": 12345,
-			"email": "altEmail1@smartsheet.com",
-			"confirmed": true                
-		}
-	]
+    "alternateEmails": [
+        {
+            "id": 12345,
+            "email": "altEmail1@smartsheet.com",
+            "confirmed": true                
+        }
+    ],
+    "sheetCount": 3,
+    "lastLogin": "2016-08-15T18:32:47Z",
+    "customWelcomeScreenViewed": "2016-08-12T12:15:47Z"
 }
 ```
 
@@ -13556,7 +13563,7 @@ Gets the User specified in the URL.
 -----|-----|
 <%= SCOPE %> | READ_USERS
 <%= HEADERS %> | <%= HEADER_AUTH %>
-<%= RETURNS %> | [UserProfile object](#userprofile-object)<br/><br/><b>Note</b>: If the API request is submitted by a system administrator, the following UserProfile attributes will be included in the response (else, they will be omitted from the response):<ul><li>status</li><li>admin</li><li>licensedSheetCreator</li><li>groupAdmin</li><li>resourceViewer</li></ul>
+<%= RETURNS %> | [UserProfile object](#userprofile-object)<br/><br/><b>Note</b>: If the API request is submitted by a system administrator, the following UserProfile attributes will be included in the response (else, they will be omitted from the response):<ul><li>status</li><li>admin</li><li>licensedSheetCreator</li><li>groupAdmin</li><li>resourceViewer</li><li>lastLogin</li><li>sheetCount</li></ul><br/><b>Note</b>: If the API request is submitted by a system administrator of an Enterprise account, and [Custom Welcome Screen](<%= CUSTOM_WELCOME_SCREEN_URL %>) is enabled, the following UserProfile attributes will be included in the response (else, they will be omitted from the response):<ul><li>customWelcomeScreenViewed</li></ul>
 
 ## List All Org Sheets
 
@@ -13652,7 +13659,8 @@ Gets the list of Users in the organization. To filter by email, use the optional
 <%= PARAMETERS %> | **email** (optional): Comma-separated list of email addresses on which to filter the results.
  | **include** (optional): When specified with a value of "lastLogin", response will include the **lastLogin** attribute for each [user](#user-object) if:<br/><ul><li>the request is submitted by a system administrator, and</li><li>the returned [IndexResult object](#indexresult-object) that contains a maximum of 100 [User objects](#user-object).</li></ul>
  | <%= PAGING_PARAMETERS %>
-<%= RETURNS %> | [IndexResult object](#indexresult-object) containing an array of [User objects](#user-object)<br/><br/><b>Note</b>: If the API request is submitted by a system administrator, the following User attributes will be included in the response (else, they will be omitted from the response):<ul><li>status</li><li>admin</li><li>licensedSheetCreator</li><li>groupAdmin</li><li>resourceViewer</li><li>lastLogin</li><li>sheetCount</li></ul><br/><b>Note</b>: If the API request is submitted by a system administrator of an Enterprise account, the following User attributes will be included in the response (else, they will be omitted from the response): <br/><ul><li>customWelcomeScreenViewed</li></ul>
+<%= RETURNS %> | [IndexResult object](#indexresult-object) containing an array of [User objects](#user-object)<br/><br/><b>Note</b>: If the API request is submitted by a system administrator, the following User attributes will be included in the response (else, they will be omitted from the response):<ul><li>status</li><li>admin</li><li>licensedSheetCreator</li><li>groupAdmin</li><li>resourceViewer</li><li>lastLogin</li><li>sheetCount</li></ul><br/><b>Note</b>: If the API request is submitted by a system administrator of an Enterprise account, and [Custom Welcome Screen](<%= CUSTOM_WELCOME_SCREEN_URL %>) is enabled, the following User attributes will be included in the response (else, they will be omitted from the response):<ul><li>customWelcomeScreenViewed</li></ul>
+
 
 ## Remove User
 
