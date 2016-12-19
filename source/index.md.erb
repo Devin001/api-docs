@@ -39,6 +39,8 @@ search: false
 <% LIST_SHARES_RESPONSE_DESC = "By default, this operation returns only <i>item-level</i> shares (<b><a href='#share-object'>scope</b></a>='ITEM'). Use the <b>include</b> parameter to request that <i>workspace-level</i> shares (<b><a href='#share-object'>scope</b></a>=='WORKSPACE') also be returned." %>
 <% WEBHOOKS_INTRO = "Webhooks provide a way for Smartsheet to automatically notify your external application or service when certain events occur in Smartsheet. Webhooks offer a more efficient alternative to using the API to periodically <i>poll</i> for changes." %>
 <% CUSTOM_WELCOME_SCREEN_URL = "https://help.smartsheet.com/articles/1392225-customizing-a-welcome-message-upgrade-screen-enterprise-only-#welcomescreen" %>
+<% USER_AUTO_PROVISIONING_URL = "https://help.smartsheet.com/articles/2072731-user-auto-provisioning-enterprise-only-" %>
+<% PERSONAL_SETTINGS_MANAGE_EMAIL_URL = "https://help.smartsheet.com/articles/2392037-change-the-email-address-used-with-your-smartsheet-account#manageemails" %>
 
 # <span class="customTOCSectionHeading">Smartsheet API 2.0</span>
 
@@ -499,6 +501,11 @@ HTTP status code | Smartsheet errorCode | Smartsheet message | Recommended Actio
 400 | 1177 | Arrays may not contain null elements. | Do not retry without fixing the problem.
 400 | 1178 | The following combination of attributes is not allowed for this operation: {0}. | Do not retry without fixing the problem.<br/><br/>Hint: Examine the detail attribute(s) within the error response for detail about the issue(s).
 400 | 1179 | The schedule specified is invalid because endAt is earlier than the next send date. | Do not retry without fixing the problem.<br/><br/>Hint: Verify that startAt, endAt, repeatEvery and other attributes will result in one or more future delivery.
+403 | 1186 | User's primary email address must be a validated domain. | To validate the domain, more information can be found [here](<%= USER_AUTO_PROVISIONING_URL %>). Otherwise, do not retry.
+403 | 1187 | User's alternate address selected to be made primary must be a validated domain. | To validate the domain, more information can be found [here](<%= USER_AUTO_PROVISIONING_URL %>). Otherwise, do not retry.
+403 | 1188 | The account status of the user specified is not active. | Do not retry without fixing the problem.
+400 | 1189 | Only Enterprise or Team accounts with security controls are able to change primary emails. | To validate the domain, more information can be found [here](<%= USER_AUTO_PROVISIONING_URL %>). Otherwise, do not retry.
+400 | 1190 | Only Enterprise or Team accounts with special permission granted are able to change primary emails. | Contact Smartsheet (<a href="mailto:api@smartsheet.com">api@smartsheet.com</a>) for assistance to enable this feature.
 500 | 4000 | An unexpected error has occurred. Please contact api@smartsheet.com for assistance. | <span class="doNotRetry">Do not retry.</span>
 503 | 4001 | Smartsheet.com is currently offline for system maintenance. Please check back again shortly. | <span class="retryAgainLater">Retry using <a href="https://en.wikipedia.org/wiki/Exponential_backoff" target="_blank">exponential backoff</a>.<br/><br/>Hint: Wait time between retries should measure in minutes (not seconds).</span>
 500 | 4002 | Server timeout exceeded. Request has failed. | <span class="retryAgainLater">Retry using <a href="https://en.wikipedia.org/wiki/Exponential_backoff" target="_blank">exponential backoff</a>.</span>
@@ -13262,6 +13269,10 @@ smartsheet.Users.add_alternate_email(
 
 Adds one or more alternate email addresses for the specified User.
 
+<aside class="notice">This operation is only available to system administrators.</aside>
+
+<aside class="notice">If the API request is submitted by a system administrator of an Enterprise account and the alternate email address <a href="<%= USER_AUTO_PROVISIONING_URL %>">domain is validated</a>, the added email address will be automatically confirmed.</aside>
+
      |     |
 -----|-----|
 <%= SCOPE %> | ADMIN_USERS
@@ -13269,6 +13280,63 @@ Adds one or more alternate email addresses for the specified User.
 <%= REQUEST %> | Array of [AlternateEmail objects](#alternateemail-object), each limited to only the **email** attribute
 <%= RETURNS %> | [Result object](#result-object) containing an array of the newly created [AlternateEmail objects](#alternateemail-object).
 <%= ERRORS %>  | If a single email address is specified in the request and an error occurs, the response will contain the typical [Error object](#errors).<br/><br/>If multiple email addresses are specified in the request and an error occurs, the [Error object](#errors) returned will contain a **detail** attribute set to an array of objects, each object in the array having the following attributes:<ul><li>**email**: Problematic email address specified in the request</li><li>**errorCode**: Smartsheet [error code](#error-handling)</li><li>**message**: Message that describes the problem with the specified email address</li></ul>For example:<br/>{<br/>&#160;&#160;"errorCode": 1160,<br/>&#160;&#160;"message": "Invalid bulk request. See detail for more information."<br/>&#160;&#160;"detail": [<br/>&#160;&#160;&#160;&#160;&#160;&#160;{<br/>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"email": "altEmail1@smartsheet.com",<br/>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"errorCode": 1157,<br/>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"message": "This address is already associated with another Smartsheet account, so it cannot be added as an alternate address for this account."<br/>&#160;&#160;&#160;&#160;&#160;&#160;}<br/>&#160;&#160;]<br/>}
+
+### Make Alternate Email Primary
+
+> Example Request:
+
+```shell
+curl https://api.smartsheet.com/2.0/users/{userId}/alternateemails/{alternatEmailId}/makeprimary \
+-H "Authorization: Bearer ACCESS_TOKEN" \
+-H "Content-Type: application/json" \
+-X POST
+```
+
+```javascript
+// [todo]
+```
+
+```csharp
+// [todo]
+```
+
+```java
+// [todo]
+```
+
+```python
+# [todo]
+```
+
+> Example Response:
+
+```json
+{
+    "message": "SUCCESS",
+    "resultCode": 0,
+    "result":
+    {
+        "id": 12345,
+        "email": "altEmail1@smartsheet.com",
+        "confirmed": false
+    }
+}
+```
+
+`POST /users/{userId}/alternateemails/{alternateEmailId}/makeprimary`
+
+Makes the specified alternate email address to become the primary email address for the specified user.
+
+<aside class="notice">This operation is only available to system administrators of an Enterprise account. <a href="http://www.smartsheet.com/enterprise/">Learn more</a> about the Enterprise platform.</aside>
+
+<aside class="notice">The alternate email address can only be made primary if both conditions are met:<ul><li>The primary email address <a href="<%= USER_AUTO_PROVISIONING_URL %>">domain is validated</a></li><li>The alternate email address is confirmed <b>OR</b> the alternate email address <a href="<%= USER_AUTO_PROVISIONING_URL %>">domain is validated</a></li></ul></aside>
+
+     |     |
+-----|-----|
+<%= SCOPE %> | ADMIN_USERS
+<%= HEADERS %> | <%= HEADER_AUTH %><br/><%= HEADER_CT_JSON %>
+<%= RETURNS %> | [Result object](#result-object) containing the [AlternateEmail object](#alternateemail-object) that is now the primary email address
+<%= ERRORS %> | If an error occurs because the special permission is not granted to change primary email address, contact Smartsheet (<a href="mailto:api@smartsheet.com">api@smartsheet.com</a>) for assistance to enable this feature.<br/><br/>If an error occurs because the specified user has a perosnal email address as the primary email address (i.e. the email address domain cannot be [validated](<%= USER_AUTO_PROVISIONING_URL %>), the specified user needs to manually change the primary email address in the [Personal Settings](<%= PERSONAL_SETTINGS_MANAGE_EMAIL_URL %>).
 
 ### Delete Alternate Email
 
